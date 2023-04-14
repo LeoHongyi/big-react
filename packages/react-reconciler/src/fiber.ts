@@ -1,5 +1,5 @@
-import { Props, Key, Ref } from 'shared/ReactTypes';
-import { WorkTag } from './workTags';
+import { Props, Key, Ref, ReactElementType } from 'shared/ReactTypes';
+import { WorkTag, FunctionComponent, HostComponent } from './workTags';
 import { Flags, NoFlags } from './fiberFlags';
 import { Container } from 'hostConfig';
 export class FiberNode {
@@ -15,10 +15,11 @@ export class FiberNode {
 	child: FiberNode | null;
 	index: number;
 
-	memorizedProps: Props | null;
+	memoizedProps: Props | null;
 	memorizedState: any;
 	alternate: FiberNode | null;
 	flags: Flags;
+	subtreeFlags: Flags;
 	updateQueue: unknown;
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
@@ -40,25 +41,26 @@ export class FiberNode {
 
 		//work unit
 		this.pendingProps = pendingProps; //start working
-		this.memorizedProps = null; // finish working
+		this.memoizedProps = null; // finish working
 		this.alternate = null;
 		this.memorizedState = null;
 		this.updateQueue = null;
 
 		//side effect
 		this.flags = NoFlags;
+		this.subtreeFlags = NoFlags;
 	}
 }
 
 export class FiberRootNode {
 	container: Container;
 	current: FiberNode;
-	finishWork: FiberNode | null;
+	finishedWork: FiberNode | null;
 	constructor(container: Container, hostRootFiber: FiberNode) {
 		this.container = container;
 		this.current = hostRootFiber;
 		hostRootFiber.stateNode = this;
-		this.finishWork = null;
+		this.finishedWork = null;
 	}
 }
 
@@ -80,12 +82,28 @@ export const createWorkInProgress = (
 		//update
 		wip.pendingProps = pendingProps;
 		wip.flags = NoFlags;
+		wip.subtreeFlags = NoFlags;
 	}
 	wip.type = current.type;
 	wip.updateQueue = current.updateQueue;
 	wip.child = current.child;
-	wip.memorizedProps = current.memorizedProps;
+	wip.memoizedProps = current.memoizedProps;
 	wip.memorizedState = current.memorizedState;
 
 	return wip;
 };
+
+export function createFiberFromElement(element: ReactElementType): FiberNode {
+	const { type, key, props } = element;
+	let fiberTag: WorkTag = FunctionComponent;
+
+	if (typeof type === 'string') {
+		fiberTag = HostComponent;
+	} else if (typeof type !== 'function' && __DEV__) {
+		console.warn('为定义的type类型', element);
+	}
+
+	const fiber = new FiberNode(fiberTag, props, key);
+	fiber.type = type;
+	return fiber;
+}

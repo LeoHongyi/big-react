@@ -1,3 +1,4 @@
+import { Action } from 'shared/ReactTypes';
 export interface Update<State> {
 	action: Action<State>;
 }
@@ -14,12 +15,12 @@ export const createUpdate = <State>(action: Action<State>): Update<State> => {
 	};
 };
 
-export const createUpdateQueue = <Action>() => {
+export const createUpdateQueue = <State>() => {
 	return {
 		shared: {
 			pending: null
 		}
-	} as UpdateQueue<Action>;
+	} as UpdateQueue<State>;
 };
 
 export const enqueueUpdate = <Action>(
