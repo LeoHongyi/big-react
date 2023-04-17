@@ -36,16 +36,16 @@ export const enqueueUpdate = <Action>(
 export const processUpdateQueue = <State>(
 	baseState: State,
 	pendingUpdate: Update<State> | null
-): { memorizedState: State } => {
+): { memoizedState: State } => {
 	const result: ReturnType<typeof processUpdateQueue<State>> = {
-		memorizedState: baseState
+		memoizedState: baseState
 	};
 	if (pendingUpdate !== null) {
 		const action = pendingUpdate.action;
 		if (action instanceof Function) {
-			result.memorizedState = action(baseState);
+			result.memoizedState = action(baseState);
 		} else {
-			result.memorizedState = action;
+			result.memoizedState = action;
 		}
 	}
 	return result;
