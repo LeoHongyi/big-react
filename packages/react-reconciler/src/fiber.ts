@@ -16,11 +16,12 @@ export class FiberNode {
 	index: number;
 
 	memoizedProps: Props | null;
-  memoizedState: any;
+	memoizedState: any;
 	alternate: FiberNode | null;
 	flags: Flags;
 	subtreeFlags: Flags;
 	updateQueue: unknown;
+	deletions: FiberNode[] | null;
 
 	constructor(tag: WorkTag, pendingProps: Props, key: Key) {
 		this.tag = tag;
@@ -49,6 +50,7 @@ export class FiberNode {
 		//side effect
 		this.flags = NoFlags;
 		this.subtreeFlags = NoFlags;
+		this.deletions = null;
 	}
 }
 
@@ -83,6 +85,7 @@ export const createWorkInProgress = (
 		wip.pendingProps = pendingProps;
 		wip.flags = NoFlags;
 		wip.subtreeFlags = NoFlags;
+		wip.deletions = null;
 	}
 	wip.type = current.type;
 	wip.updateQueue = current.updateQueue;
